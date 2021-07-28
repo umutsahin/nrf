@@ -38,6 +38,7 @@ func AccessTokenProcedure(request models.AccessTokenReq) (response *models.Acces
 	var expiration int32 = 1000
 	scope := request.Scope
 	tokenType := "Bearer"
+	now := int32(time.Now().Unix())
 
 	// Create AccessToken
 	accessTokenClaims := models.AccessTokenClaims{
@@ -45,9 +46,10 @@ func AccessTokenProcedure(request models.AccessTokenReq) (response *models.Acces
 		Sub:            request.NfInstanceId,       // nfInstanceId of service consumer
 		Aud:            request.TargetNfInstanceId, // nfInstanceId of service producer
 		Scope:          request.Scope,              // TODO: the name of the NF services for which the
-		Exp:            expiration,                 //       access_token is authorized for use
+		Exp:            now + expiration,                 //       access_token is authorized for use
 		StandardClaims: jwt.StandardClaims{},
 	}
+	accessTokenClaims.IssuedAt= int64(now)
 
 	mySigningKey := []byte("NRF") // AllYourBase
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, accessTokenClaims)
